@@ -35,6 +35,18 @@ save_img = pygame.image.load('img/save_btn.png').convert_alpha()
 
 score_coin_img = pygame.image.load('img/tile/32.png').convert_alpha()
 coin_img = pygame.transform.scale(score_coin_img, (25, 25))
+
+nameActive = False
+newName = ""
+user = ""
+
+passActive = False
+newPass = ""
+passw = ""
+
+
+
+
 running = True
 while running:
     for event in pygame.event.get():
