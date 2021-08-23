@@ -41,6 +41,33 @@ user = ""
 passActive = False
 newPass = ""
 passw = ""
+def draw_text(text, font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x, y))
+
+
+def restart():
+    ammo_group.empty()
+    danger_group.empty()
+    decoration_group.empty()
+    treasure_group.empty()
+    exit_group.empty()
+    enemy_group.empty()
+
+    data = []
+    for row in range(rows):
+        r = [-1] * columns
+        data.append(r)
+    return data
+
+
+def draw_bg():
+    s_width = sky_img.get_width()
+    for x in range(5):
+        screen.blit(bg_img, ((x * width) - bg_scroll * 0.5, 0))
+        screen.blit(mountain_img, ((x * s_width) - bg_scroll * 0.6, height - mountain_img.get_height() - 300))
+        screen.blit(pine1_img, ((x * s_width) - bg_scroll * 0.7, height - pine1_img.get_height() - 150))
+        screen.blit(pine2_img, ((x * s_width) - bg_scroll * 0.8, height - pine2_img.get_height()))
 
 
 running = True
