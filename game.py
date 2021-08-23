@@ -39,7 +39,21 @@ score_coin_img = pygame.image.load('img/tile/32.png').convert_alpha()
 coin_img = pygame.transform.scale(score_coin_img, (25, 25))
 
 bullet_count = pygame.transform.scale(bullet_img, (25, 25))
-running = True
+
+nameActive = False
+newName = ""
+user = ""
+
+passActive = False
+newPass = ""
+passw = ""
+
+
+def draw_text(text, font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x, y))
+
+
 while running:
     draw_text()
     for event in pygame.event.get():
