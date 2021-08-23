@@ -130,6 +130,32 @@ class Character(pygame.sprite.Sprite):
             else:
                 self.frame_index = 0
 
+    def check_state(self, new_state):
+        if new_state != self.state:
+            self.state = new_state
+            self.frame_index = 0
+            self.update_time = pygame.time.get_ticks()
+
+    def shoot(self):
+        if self.shoot_timer == 0 and self.bullet > 0:
+            self.shoot_timer = 20
+            ammo = Ammo(self.rect.centerx + (self.rect.size[0] * self.direction), self.rect.centery,
+                        self.direction)
+            ammo_group.add(ammo)
+
+            self.bullet -= 1
+
+    def update(self):
+        self.character_state()
+        self.death()
+
+        if self.shoot_timer > 0:
+            self.shoot_timer -= 1
+
+    def move(self, turn_left, turn_right):
+        camera_scroll = 0
+        change_x = 0
+        change_y = 0
 
 running = True
 while running:
