@@ -157,6 +157,117 @@ class Character(pygame.sprite.Sprite):
         change_x = 0
         change_y = 0
 
+        # turning
+        if turn_right:
+            change_x = self.vel
+            self.flip = False
+            self.direction = 1
+        elif turn_left:
+            change_x = -self.vel
+            self.flip = True
+            self.direction = -1
+
+        # falling
+
+        if self.jump == True and self.jumping == False:
+            self.jump_vel = -19
+            self.jump = False
+            self.jumping = True
+
+        self.jump_vel += 1
+        if self.jump_vel > 10:
+            self.jump_vel
+        change_y += self.jump_vel
+
+        for objects in world.collision_tiles:
+            # getting rect by[1]
+            if objects[1].colliderect(self.rect.x + change_x, self.rect.y, self.width, self.height):
+                change_x = 0
+
+                if self.char_type == 'enemy':
+                    self.direction *= -1
+                    self.move_timer = 0
+
+            if objects[1].colliderect(self.rect.x, self.rect.y + change_y, self.width, self.height):
+                if self.jump_vel < 0:
+                    self.jump_vel = 0
+                    change_y = objects[1].bottom - self.rect.top
+
+                elif self.jump_vel >= 0:
+                    self.jump_vel = 0
+                    self.jumping = False
+                    change_y = objects[1].top - self.rect.bottom
+ # danger group
+        if pygame.sprite.spritecollide(self, danger_group, False):
+            self.health = 0
+
+        level_complete = False
+        if pygame.sprite.spritecollide(self, exit_group, False):
+            level_complete = True
+
+        if pygame.sprite.spritecollide(self, enemy_group, False):
+            self.health -= 1.7
+
+        # off the map
+        if self.rect.bottom > height:
+            self.health = 0
+
+        if self.char_type == 'player':
+            if self.rect.left + change_x < -15 or self.rect.right + change_x > width:
+                change_x = 0
+
+        self.rect.x += change_x
+        self.rect.y += change_y
+
+        if self.char_type == 'player':
+            # scroll left or right
+            if (self.rect.right > width / 4 and self.direction > 0) or (
+                    self.rect.left < width - width / 4 and self.direction < 0):
+                self.rect.x -= change_x
+                camera_scroll = - change_x
+        return camera_scroll, level_complete
+
+    def draw(self):
+        screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
+
+    def death(self):
+        if self.health <= 0:
+            self.health = 0
+            self.vel = 0
+            self.alive = False
+
+            self.check_state(3)
+
+    def enemy_movement(self):
+        if self.alive and player.alive:
+            if self.stop == False and random.randint(1, 200) == 2:
+                self.check_state(0)
+                self.stop = True
+                self.stop_timer = 50
+
+            else:
+                if self.stop == False:
+
+                    if self.direction == 1:
+                        ene_right = True
+                    else:
+                        ene_right = False
+                    ene_left = not ene_right
+                    self.move(ene_left, ene_right)
+                    self.check_state(1)
+                    self.move_timer += 1
+
+                    # how far enemies walk
+                    if self.move_timer > tile_size:
+                        self.direction *= -1
+                        self.move_timer *= -1
+                else:
+                    self.stop_timer -= 1
+                    if self.stop_timer <= 0:
+                        self.stop = False
+        self.rect.x += camera_scroll
+
+
 running = True
 while running:
     for event in pygame.event.get():
