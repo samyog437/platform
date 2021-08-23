@@ -68,6 +68,67 @@ def draw_bg():
         screen.blit(mountain_img, ((x * s_width) - bg_scroll * 0.6, height - mountain_img.get_height() - 300))
         screen.blit(pine1_img, ((x * s_width) - bg_scroll * 0.7, height - pine1_img.get_height() - 150))
         screen.blit(pine2_img, ((x * s_width) - bg_scroll * 0.8, height - pine2_img.get_height()))
+class Character(pygame.sprite.Sprite):
+
+    def __init__(self, char_type, x, y, vel, bullet):
+        self.index = 0
+        self.char_type = char_type
+        self.vel = vel
+
+        self.img_list = []
+        self.frame_index = 0
+        self.state = 0
+        self.update_time = pygame.time.get_ticks()
+
+        self.shoot_timer = 0
+        self.bullet = bullet
+        self.initial_bullet = bullet
+
+        img_state = ['idle', 'run', 'jump', 'dead']
+        for state in img_state:
+            images = []
+            num_of_img = len(os.listdir(f'img/{self.char_type}/{state}'))
+
+            for num in range(num_of_img):
+                img = pygame.image.load(f'img/{self.char_type}/{state}/{num}.png').convert_alpha()
+                img = pygame.transform.scale(img, (40, 80)).convert_alpha()
+                images.append(img)
+            self.img_list.append(images)
+
+        self.image = self.img_list[self.state][self.frame_index]
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.width = self.image.get_width()
+        self.height = self.image.get_height()
+
+        self.jump_vel = 0
+        self.jump = False
+        self.direction = 1
+        self.flip = False
+        self.jumping = True
+
+        self.alive = True
+        self.health = 100
+        self.max_health = self.health
+        self.health_timer = 0
+        self.decrease = False
+
+        self.mask = pygame.mask.from_surface(self.image)
+        self.move_timer = 0
+        self.stop = False
+
+    def character_state(self):
+        change_time = 100
+        self.image = self.img_list[self.state][self.frame_index]
+
+        if pygame.time.get_ticks() - self.update_time > 100:
+            self.frame_index += 1
+            self.update_time = pygame.time.get_ticks()
+        if self.frame_index >= len(self.img_list[self.state]):
+            if self.state == 3:
+                self.frame_index = len(self.img_list[self.state]) - 1
+            else:
+                self.frame_index = 0
 
 
 running = True
