@@ -328,6 +328,51 @@ class Level:
                         danger = Danger(img, j * tile_size, i * tile_size)
                         danger_group.add(danger)
 
+                    elif tile == 29:
+                        enemy = Blob(img, j * tile_size, i * tile_size)
+                        enemy_group.add(enemy)
+                    elif tile == 30:
+                        player = Character('player', j * tile_size, i * tile_size, 5, 10)
+                        hbar = Bar(10, 10, player.health, player.health)
+                    elif tile == 31:
+                        door = Exit(img, j * tile_size, i * tile_size)
+                        exit_group.add(door)
+                    elif tile == 32:
+                        coin = Coin(img, j * tile_size, i * tile_size)
+                        coin_group.add(coin)
+
+                    return player, hbar
+
+    def draw(self):
+        for tile in self.collision_tiles:
+            # move tiles along with screen
+            tile[1][0] += camera_scroll
+            screen.blit(tile[0], tile[1])
+
+
+class Blob(pygame.sprite.Sprite):
+    def __init__(self, img, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.midtop = ((x + tile_size // 2), (y + (tile_size - self.image.get_height())))
+        self.rect.x = x
+        self.rect.y = y
+        self.move_direction = 1
+        self.move_counter = 0
+
+    def update(self):
+        self.rect.x += camera_scroll
+        blob_x = 0
+
+    def walk(self):
+        self.rect.x += self.move_direction
+        self.move_counter += 1
+        if abs(self.move_counter) > 50:
+            self.move_direction *= -1
+            self.move_counter *= -1
+
+
 running = True
 while running:
     for event in pygame.event.get():
