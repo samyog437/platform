@@ -296,6 +296,37 @@ class Ammo(pygame.sprite.Sprite):
         if collided_enemy:
             enemy_audio.play()
             collided_enemy.kill()
+class Level:
+    def __init__(self):
+        self.collision_tiles = []
+
+    def game_data(self, layout):
+        self.level_length = len(layout[0])
+        # iterate through csv files
+        for i, row in enumerate(layout):
+            for j, tile in enumerate(row):
+                if tile >= 0:
+                    img = images[tile]
+                    img_rect = img.get_rect()
+                    # positions on the screen
+                    img_rect.x = j * tile_size
+                    img_rect.y = i * tile_size
+
+                    # tile data
+
+                    tile_data = (img, img_rect)
+
+                    if 0 <= tile <= 21:
+                        self.collision_tiles.append(tile_data)
+                    elif 22 <= tile <= 25:
+                        deco = Deco(img, j * tile_size, i * tile_size)
+                        decoration_group.add(deco)
+                    elif tile == 26:
+                        treasure = Treasure('treasure', j * tile_size, i * tile_size)
+                        treasure_group.add(treasure)
+                    elif tile == 27 or tile == 28:
+                        danger = Danger(img, j * tile_size, i * tile_size)
+                        danger_group.add(danger)
 
 running = True
 while running:
