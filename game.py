@@ -47,6 +47,36 @@ passw = ""
 
 
 
+
+
+
+class Character(pygame.sprite.Sprite):
+
+    def __init__(self, char_type, x, y, vel, bullet):
+        self.index = 0
+        self.char_type = char_type
+        self.vel = vel
+
+        self.img_list = []
+        self.frame_index = 0
+        self.state = 0
+        self.update_time = pygame.time.get_ticks()
+
+        self.shoot_timer = 0
+        self.bullet = bullet
+        self.initial_bullet = bullet
+
+        img_state = ['idle', 'run', 'jump', 'dead']
+        for state in img_state:
+            images = []
+            num_of_img = len(os.listdir(f'img/{self.char_type}/{state}'))
+
+            for num in range(num_of_img):
+                img = pygame.image.load(f'img/{self.char_type}/{state}/{num}.png').convert_alpha()
+                img = pygame.transform.scale(img, (40, 80)).convert_alpha()
+                images.append(img)
+            self.img_list.append(images)
+
 running = True
 while running:
     for event in pygame.event.get():
