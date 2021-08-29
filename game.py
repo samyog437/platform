@@ -76,6 +76,28 @@ class Character(pygame.sprite.Sprite):
                 img = pygame.transform.scale(img, (40, 80)).convert_alpha()
                 images.append(img)
             self.img_list.append(images)
+        self.image = self.img_list[self.state][self.frame_index]
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.width = self.image.get_width()
+        self.height = self.image.get_height()
+
+        self.jump_vel = 0
+        self.jump = False
+        self.direction = 1
+        self.flip = False
+        self.jumping = True
+
+        self.alive = True
+        self.health = 100
+        self.max_health = self.health
+        self.health_timer = 0
+        self.decrease = False
+
+        self.mask = pygame.mask.from_surface(self.image)
+        self.move_timer = 0
+        self.stop = False
+
 
 running = True
 while running:
