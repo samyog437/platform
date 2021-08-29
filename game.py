@@ -36,6 +36,8 @@ save_img = pygame.image.load('img/save_btn.png').convert_alpha()
 score_coin_img = pygame.image.load('img/tile/32.png').convert_alpha()
 coin_img = pygame.transform.scale(score_coin_img, (25, 25))
 
+bullet_count = pygame.transform.scale(bullet_img, (25, 25))
+
 nameActive = False
 newName = ""
 user = ""
@@ -97,6 +99,87 @@ class Character(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.move_timer = 0
         self.stop = False
+
+    def character_state(self):
+        change_time = 100
+        self.image = self.img_list[self.state][self.frame_index]
+
+        if pygame.time.get_ticks() - self.update_time > 100:
+            self.frame_index += 1
+            self.update_time = pygame.time.get_ticks()
+        if self.frame_index >= len(self.img_list[self.state]):
+            if self.state == 3:
+                self.frame_index = len(self.img_list[self.state]) - 1
+            else:
+                self.frame_index = 0
+
+    def check_state(self, new_state):
+        if new_state != self.state:
+            self.state = new_state
+            self.frame_index = 0
+            self.update_time = pygame.time.get_ticks()
+
+    def shoot(self):
+        if self.shoot_timer == 0 and self.bullet > 0:
+            self.shoot_timer = 20
+            ammo = Ammo(self.rect.centerx + (self.rect.size[0] * self.direction), self.rect.centery,
+                        self.direction)
+            ammo_group.add(ammo)
+
+            self.bullet -= 1
+
+    def update(self):
+        self.character_state()
+        self.death()
+
+        if self.shoot_timer > 0:
+            self.shoot_timer -= 1
+
+    def move(self, turn_left, turn_right):
+        camera_scroll = 0
+        change_x = 0
+        change_y = 0
+
+        # turning
+        if turn_right:
+            change_x = self.vel
+            self.flip = False
+            self.direction = 1
+        elif turn_left:
+            change_x = -self.vel
+            self.flip = True
+            self.direction = -1
+
+        # falling
+
+        if self.jump == True and self.jumping == False:
+            self.jump_vel = -19
+            self.jump = False
+            self.jumping = True
+
+        self.jump_vel += 1
+        if self.jump_vel > 10:
+            self.jump_vel
+        change_y += self.jump_vel
+
+        for objects in world.collision_tiles:
+            # getting rect by[1]
+            if objects[1].colliderect(self.rect.x + change_x, self.rect.y, self.width, self.height):
+                change_x = 0
+
+                if self.char_type == 'enemy':
+                    self.direction *= -1
+                    self.move_timer = 0
+
+            if objects[1].colliderect(self.rect.x, self.rect.y + change_y, self.width, self.height):
+                if self.jump_vel < 0:
+                    self.jump_vel = 0
+                    change_y = objects[1].bottom - self.rect.top
+
+                elif self.jump_vel >= 0:
+                    self.jump_vel = 0
+                    self.jumping = False
+                    change_y = objects[1].top - self.rect.bottom
 
 
 running = True
