@@ -400,6 +400,19 @@ class Danger(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.midtop = ((x + tile_size // 2), (y + (tile_size - self.image.get_height())))
 
+    def update(self):
+        self.rect.x += camera_scroll
+
+
+class Exit(pygame.sprite.Sprite):
+    def __init__(self, img, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.midtop = ((x + tile_size // 2), (y + (tile_size - self.image.get_height())))
+
+    def update(self):
+        self.rect.x += camera_scroll
 
 
 running = True
