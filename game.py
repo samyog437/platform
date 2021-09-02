@@ -372,6 +372,18 @@ class Blob(pygame.sprite.Sprite):
             self.move_direction *= -1
             self.move_counter *= -1
 
+class Coin(pygame.sprite.Sprite):
+    def __init__(self, img, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        img = pygame.transform.scale(img, (25, 25)).convert_alpha()
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.midtop = ((x + tile_size // 2), (y + (tile_size - self.image.get_height())))
+
+    def update(self):
+        self.rect.x += camera_scroll
+
+
 
 running = True
 while running:
