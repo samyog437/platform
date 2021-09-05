@@ -413,6 +413,21 @@ class Exit(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.x += camera_scroll
+class Treasure(pygame.sprite.Sprite):
+    def __init__(self, item, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.item = item
+        self.image = item_type[self.item]
+        self.rect = self.image.get_rect()
+        self.rect.midtop = ((x + tile_size // 2), (y + (tile_size - self.image.get_height())))
+
+    def update(self):
+        self.rect.x += camera_scroll
+
+
+shoot = False
+menu = True
+nameMenu = True
 
 
 running = True
