@@ -424,6 +424,21 @@ class Treasure(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += camera_scroll
 
+    restart_btn = Button(width // 2 - 150, height // 2 - 50, restart_img, 1.8)
+    exit_btn = Button(width // 2 + 30, height // 2 + 10, exit_img, 0.5)
+    start_btn = Button(width // 2 - 190, height // 2 + 10, start_img, 0.5)
+    save_btn = Button(250, 190, save_img, 1)
+
+    ammo_group = pygame.sprite.Group()
+    treasure_group = pygame.sprite.Group()
+    coin_group = pygame.sprite.Group()
+    enemy_group = pygame.sprite.Group()
+    bar_group = pygame.sprite.Group()
+    decoration_group = pygame.sprite.Group()
+    danger_group = pygame.sprite.Group()
+    exit_group = pygame.sprite.Group()
+    tile_group = pygame.sprite.Group()
+
 
 shoot = False
 menu = True
