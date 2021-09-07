@@ -252,6 +252,56 @@ class Character(pygame.sprite.Sprite):
         self.rect.x += camera_scroll
 
 
+class Ammo(pygame.sprite.Sprite):
+    score = 0
+
+    def __init__(self, x, y, direction):
+        pygame.sprite.Sprite.__init__(self)  # inherit from sprite
+        self.vel = 5
+        self.image = bullet_img
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.direction = direction
+
+    def update(self):
+        score = 0
+        self.rect.x += (self.direction * self.vel) + camera_scroll
+
+        if self.rect.right > width or self.rect.right < 0:
+            self.kill()
+
+        if pygame.sprite.spritecollide(player, ammo_group, False):
+            if player.alive:
+                player.health -= 20
+                self.kill()
+
+        if pygame.sprite.spritecollide(self, enemy_group, False):
+            self.kill()
+
+        collided_enemy = pygame.sprite.spritecollideany(self, enemy_group)
+        if collided_enemy:
+            enemy_audio.play()
+            collided_enemy.kill()
+
+
+class Level:
+    def __init__(self):
+        self.collision_tiles = []
+
+    def game_data(self, layout):
+        self.level_length = len(layout[0])
+        # iterate through csv files
+        for i, row in enumerate(layout):
+            for j, tile in enumerate(row):
+                if tile >= 0:
+                    img = images[tile]
+                    img_rect = img.get_rect()
+                    # positions on the screen
+                    img_rect.x = j * tile_size
+                    img_rect.y = i * tile_size
+
+
+
 running = True
 while running:
     for event in pygame.event.get():
