@@ -389,3 +389,12 @@ class Level:
             # move tiles along with screen
             tile[1][0] += camera_scroll
             screen.blit(tile[0], tile[1])
+class Ammo(pygame.sprite.Sprite):
+    score = 0
+
+    def __init__(self, x, y, direction):
+        pygame.sprite.Sprite.__init__(self)  # inherit from sprite
+        self.vel = 5
+        self.image = bullet_img
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
