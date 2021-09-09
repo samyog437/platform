@@ -438,6 +438,21 @@ class Treasure(pygame.sprite.Sprite):
     danger_group = pygame.sprite.Group()
     exit_group = pygame.sprite.Group()
     tile_group = pygame.sprite.Group()
+    # level setup
+    level_layout = []
+    for row in range(rows):
+        r = [-1] * columns
+        level_layout.append(r)
+
+    with open(f'level{level}_data.csv', newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        # individual row and tile, count
+        for i, row in enumerate(reader):
+            for j, tile in enumerate(row):
+                level_layout[i][j] = int(tile)
+
+    world = Level()
+    player, hbar = world.game_data(level_layout)
 
 
 shoot = False
