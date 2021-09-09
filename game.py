@@ -454,6 +454,30 @@ class Treasure(pygame.sprite.Sprite):
     world = Level()
     player, hbar = world.game_data(level_layout)
 
+    def score_save():
+        gscore = str(game_score)
+        db = sqlite3.connect('score.db')
+        db.execute("CREATE TABLE IF NOT EXISTS score(score INTEGER)")
+        cursor = db.cursor()
+        cursor.execute("INSERT INTO score(score) VALUES (?)", (gscore,))
+        db.commit()
+        db.close()
+
+    def score_display():
+        db = sqlite3.connect('score.db')
+        db.execute("CREATE TABLE IF NOT EXISTS score(score INTEGER)")
+        cursor = db.cursor()
+        cursor.execute("SELECT MAX(score) FROM score")
+        data = cursor.fetchone()
+        if data:
+            draw_text('High Score:' + str(data[0]), font, 'white', 370, 40)
+        db.close()
+
+    bg_audio.play()
+
+    running = True
+    keys = pygame.key.get_pressed()
+
 
 shoot = False
 menu = True
