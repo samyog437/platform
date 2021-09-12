@@ -598,6 +598,99 @@ class Treasure(pygame.sprite.Sprite):
             score_save()
 
         hbar.draw(player.health)
+    ammo_group.update()
+    ammo_group.draw(screen)
+    treasure_group.update()
+    danger_group.update()
+    decoration_group.update()
+    exit_group.update()
+    coin_group.update()
+
+    enemy_group.draw(screen)
+    enemy_group.update()
+    treasure_group.draw(screen)
+    coin_group.draw(screen)
+    danger_group.draw(screen)
+    decoration_group.draw(screen)
+    exit_group.draw(screen)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            pygame.quit()
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if userNameBorder.collidepoint(event.pos):
+                nameActive = True
+            else:
+                nameActive = False
+            if userPassBorder.collidepoint(event.pos):
+                passActive = True
+            else:
+                passActive = False
+
+        if event.type == pygame.KEYDOWN:
+            if nameActive:
+                if event.key == pygame.K_BACKSPACE:
+                    newName = newName[:-1]
+                else:
+                    newName += event.unicode
+            if passActive:
+                if event.key == pygame.K_BACKSPACE:
+                    newPass = newPass[:-1]
+                else:
+                    newPass += event.unicode
+            if event.key == pygame.K_SPACE:
+                shoot = True
+            if event.key == pygame.K_LEFT:
+                turn_left = True
+                turn_right = False
+            if event.key == pygame.K_RIGHT:
+                turn_right = True
+                turn_left = False
+
+            if event.key == pygame.K_UP:
+                player.jump = True
+
+            if event.key == pygame.K_DOWN:
+                player.jump = False
+
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT:
+                turn_left = False
+            if event.key == pygame.K_RIGHT:
+                turn_right = False
+            if event.key == pygame.K_UP:
+                player.jump = False
+            if event.key == pygame.K_SPACE:
+                shoot = False
+
+        if player.alive:
+            if shoot:
+                player.shoot()
+            if player.jumping:
+                player.check_state(2)
+            elif turn_left or turn_right:
+                player.check_state(1)
+            else:
+                player.check_state(0)
+
+        else:
+            camera_scroll = 0
+            if restart_btn.draw(screen):
+                level_layout = restart()
+                with open(f'level{level}_data.csv', newline='') as csvfile:
+                    reader = csv.reader(csvfile, delimiter=',')
+                    # individual row and tile, count
+                    for i, row in enumerate(reader):
+                        for j, tile in enumerate(row):
+                            level_layout[i][j] = int(tile)
+
+                world = Level()
+
+                player, hbar = world.game_data(level_layout)
+    score_display()
+    pygame.display.update()
 
 
 shoot = False
