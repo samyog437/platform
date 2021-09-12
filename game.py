@@ -1,4 +1,10 @@
-import pygame
+import csv
+import os
+import random
+import sqlite3
+
+from bar import *
+from button import Button
 
 pygame.init()
 pygame.font.init()
@@ -41,6 +47,8 @@ user = ""
 passActive = False
 newPass = ""
 passw = ""
+
+
 def draw_text(text, font, text_col, x, y):
     img = font.render(text, True, text_col)
     screen.blit(img, (x, y))
@@ -68,6 +76,8 @@ def draw_bg():
         screen.blit(mountain_img, ((x * s_width) - bg_scroll * 0.6, height - mountain_img.get_height() - 300))
         screen.blit(pine1_img, ((x * s_width) - bg_scroll * 0.7, height - pine1_img.get_height() - 150))
         screen.blit(pine2_img, ((x * s_width) - bg_scroll * 0.8, height - pine2_img.get_height()))
+
+
 class Character(pygame.sprite.Sprite):
 
     def __init__(self, char_type, x, y, vel, bullet):
@@ -197,7 +207,8 @@ class Character(pygame.sprite.Sprite):
                     self.jump_vel = 0
                     self.jumping = False
                     change_y = objects[1].top - self.rect.bottom
- # danger group
+
+        # danger group
         if pygame.sprite.spritecollide(self, danger_group, False):
             self.health = 0
 
@@ -266,6 +277,8 @@ class Character(pygame.sprite.Sprite):
                     if self.stop_timer <= 0:
                         self.stop = False
         self.rect.x += camera_scroll
+
+
 class Ammo(pygame.sprite.Sprite):
     score = 0
 
@@ -296,6 +309,8 @@ class Ammo(pygame.sprite.Sprite):
         if collided_enemy:
             enemy_audio.play()
             collided_enemy.kill()
+
+
 class Level:
     def __init__(self):
         self.collision_tiles = []
@@ -327,7 +342,6 @@ class Level:
                     elif tile == 27 or tile == 28:
                         danger = Danger(img, j * tile_size, i * tile_size)
                         danger_group.add(danger)
-
                     elif tile == 29:
                         enemy = Blob(img, j * tile_size, i * tile_size)
                         enemy_group.add(enemy)
@@ -341,7 +355,7 @@ class Level:
                         coin = Coin(img, j * tile_size, i * tile_size)
                         coin_group.add(coin)
 
-                    return player, hbar
+        return player, hbar
 
     def draw(self):
         for tile in self.collision_tiles:
@@ -372,6 +386,7 @@ class Blob(pygame.sprite.Sprite):
             self.move_direction *= -1
             self.move_counter *= -1
 
+
 class Coin(pygame.sprite.Sprite):
     def __init__(self, img, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -382,6 +397,8 @@ class Coin(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.x += camera_scroll
+
+
 class Deco(pygame.sprite.Sprite):
     def __init__(self, img, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -413,6 +430,8 @@ class Exit(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.x += camera_scroll
+
+
 class Treasure(pygame.sprite.Sprite):
     def __init__(self, item, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -424,180 +443,190 @@ class Treasure(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += camera_scroll
 
-    restart_btn = Button(width // 2 - 150, height // 2 - 50, restart_img, 1.8)
-    exit_btn = Button(width // 2 + 30, height // 2 + 10, exit_img, 0.5)
-    start_btn = Button(width // 2 - 190, height // 2 + 10, start_img, 0.5)
-    save_btn = Button(250, 190, save_img, 1)
 
-    ammo_group = pygame.sprite.Group()
-    treasure_group = pygame.sprite.Group()
-    coin_group = pygame.sprite.Group()
-    enemy_group = pygame.sprite.Group()
-    bar_group = pygame.sprite.Group()
-    decoration_group = pygame.sprite.Group()
-    danger_group = pygame.sprite.Group()
-    exit_group = pygame.sprite.Group()
-    tile_group = pygame.sprite.Group()
-    # level setup
-    level_layout = []
-    for row in range(rows):
-        r = [-1] * columns
-        level_layout.append(r)
+shoot = False
+menu = True
+nameMenu = True
 
-    with open(f'level{level}_data.csv', newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',')
-        # individual row and tile, count
-        for i, row in enumerate(reader):
-            for j, tile in enumerate(row):
-                level_layout[i][j] = int(tile)
+restart_btn = Button(width // 2 - 150, height // 2 - 50, restart_img, 1.8)
+exit_btn = Button(width // 2 + 30, height // 2 + 10, exit_img, 0.5)
+start_btn = Button(width // 2 - 190, height // 2 + 10, start_img, 0.5)
+save_btn = Button(250, 190, save_img, 1)
 
-    world = Level()
-    player, hbar = world.game_data(level_layout)
+ammo_group = pygame.sprite.Group()
+treasure_group = pygame.sprite.Group()
+coin_group = pygame.sprite.Group()
+enemy_group = pygame.sprite.Group()
+bar_group = pygame.sprite.Group()
+decoration_group = pygame.sprite.Group()
+danger_group = pygame.sprite.Group()
+exit_group = pygame.sprite.Group()
+tile_group = pygame.sprite.Group()
 
-    def score_save():
-        gscore = str(game_score)
-        db = sqlite3.connect('score.db')
-        db.execute("CREATE TABLE IF NOT EXISTS score(score INTEGER)")
-        cursor = db.cursor()
-        cursor.execute("INSERT INTO score(score) VALUES (?)", (gscore,))
-        db.commit()
-        db.close()
+# level setup
+level_layout = []
+for row in range(rows):
+    r = [-1] * columns
+    level_layout.append(r)
 
-    def score_display():
-        db = sqlite3.connect('score.db')
-        db.execute("CREATE TABLE IF NOT EXISTS score(score INTEGER)")
-        cursor = db.cursor()
-        cursor.execute("SELECT MAX(score) FROM score")
-        data = cursor.fetchone()
-        if data:
-            draw_text('High Score:' + str(data[0]), font, 'white', 370, 40)
-        db.close()
+with open(f'level{level}_data.csv', newline='') as csvfile:
+    reader = csv.reader(csvfile, delimiter=',')
+    # individual row and tile, count
+    for i, row in enumerate(reader):
+        for j, tile in enumerate(row):
+            level_layout[i][j] = int(tile)
 
-    bg_audio.play()
+world = Level()
+player, hbar = world.game_data(level_layout)
 
-    running = True
-    keys = pygame.key.get_pressed()
-    while running:
-        clock.tick(fps)
 
-        draw_bg()
-        # screen.blit(bg_img, (0, 0))
-        # screen.blit(sun_img, (100, 100))
-        screen.blit(coin_img, (10, 45))
-        screen.blit(bullet_count, (11, 77))
-        world.draw()
-        player.update()
-        player.draw()
-        camera_scroll, level_complete = player.move(turn_left, turn_right)
-        bg_scroll = camera_scroll
+def score_save():
+    gscore = str(game_score)
+    db = sqlite3.connect('score.db')
+    db.execute("CREATE TABLE IF NOT EXISTS score(score INTEGER)")
+    cursor = db.cursor()
+    cursor.execute("INSERT INTO score(score) VALUES (?)", (gscore,))
+    db.commit()
+    db.close()
 
-        if nameMenu == True:
-            nameSurface = font.render(newName, True, "white")
-            userNameBorder = pygame.Rect(360, 100, nameSurface.get_width() + 10, 30)
-            screen.blit(nameSurface, (360, 100))
 
-            passSurface = font.render(newPass, True, "white")
-            userPassBorder = pygame.Rect(360, 145, passSurface.get_width() + 10, 30)
-            screen.blit(passSurface, (360, 145))
+def score_display():
+    db = sqlite3.connect('score.db')
+    db.execute("CREATE TABLE IF NOT EXISTS score(score INTEGER)")
+    cursor = db.cursor()
+    cursor.execute("SELECT MAX(score) FROM score")
+    data = cursor.fetchone()
+    if data:
+        draw_text('High Score:' + str(data[0]), font, 'white', 370, 40)
+    db.close()
 
-            if nameActive:
-                pygame.draw.rect(screen, "white", userNameBorder, 2)
-                userNamePrompt = font.render("Enter UserName: ", True, "white")
-            else:
-                pygame.draw.rect(screen, "slategrey", userNameBorder, 2)
-                userNamePrompt = font.render("Enter Username: ", True, "slategrey")
+bg_audio.play()
 
-            screen.blit(userNamePrompt, (190, 70 + nameSurface.get_height()))
+running = True
+keys = pygame.key.get_pressed()
 
-            if passActive:
-                pygame.draw.rect(screen, "white", userPassBorder, 2)
-                userPassPrompt = font.render("Enter Password: ", True, "white")
-            else:
-                pygame.draw.rect(screen, "slategrey", userPassBorder, 2)
-                userPassPrompt = font.render("Enter Password: ", True, "slategrey")
+while running:
+    clock.tick(fps)
 
-            screen.blit(userPassPrompt, (190, 115 + nameSurface.get_height()))
+    draw_bg()
+    # screen.blit(bg_img, (0, 0))
+    # screen.blit(sun_img, (100, 100))
+    screen.blit(coin_img, (10, 45))
+    screen.blit(bullet_count, (11, 77))
+    world.draw()
+    player.update()
+    player.draw()
+    camera_scroll, level_complete = player.move(turn_left, turn_right)
+    bg_scroll = camera_scroll
 
-            if save_btn.draw(screen):
-                if newName != "" and newPass != "":
-                    user = newName
-                    passw = newPass
-                    db = sqlite3.connect('user.db')
-                    db.execute("CREATE TABLE IF NOT EXISTS user(name TEXT, password TEXT)")
-                    cursor = db.cursor()
-                    cursor.execute("INSERT INTO user(name, password) VALUES (?, ?)", (user, passw,))
-                    db.commit()
-                    db.close()
-                click_audio.play()
-                nameMenu = False
+    if nameMenu == True:
+        nameSurface = font.render(newName, True, "white")
+        userNameBorder = pygame.Rect(360, 100, nameSurface.get_width() + 10, 30)
+        screen.blit(nameSurface, (360, 100))
 
-        if menu == True:
-            if start_btn.draw(screen):
-                click_audio.play()
-                menu = False
-            if exit_btn.draw(screen):
-                running = False
+        passSurface = font.render(newPass, True, "white")
+        userPassBorder = pygame.Rect(360, 145, passSurface.get_width() + 10, 30)
+        screen.blit(passSurface, (360, 145))
 
-        if level_complete:
-            level += 1
-            bg_scroll = 0
-            level_layout = restart()
-            with open(f'level{level}_data.csv', newline='') as csvfile:
-                reader = csv.reader(csvfile, delimiter=',')
-                # individual row and tile, count
-                for i, row in enumerate(reader):
-                    for j, tile in enumerate(row):
-                        level_layout[i][j] = int(tile)
+        if nameActive:
+            pygame.draw.rect(screen, "white", userNameBorder, 2)
+            userNamePrompt = font.render("Enter UserName: ", True, "white")
+        else:
+            pygame.draw.rect(screen, "slategrey", userNameBorder, 2)
+            userNamePrompt = font.render("Enter Username: ", True, "slategrey")
 
-            world = Level()
+        screen.blit(userNamePrompt, (190, 70 + nameSurface.get_height()))
 
-            player, hbar = world.game_data(level_layout)
+        if passActive:
+            pygame.draw.rect(screen, "white", userPassBorder, 2)
+            userPassPrompt = font.render("Enter Password: ", True, "white")
+        else:
+            pygame.draw.rect(screen, "slategrey", userPassBorder, 2)
+            userPassPrompt = font.render("Enter Password: ", True, "slategrey")
 
-        if restart_btn.clicked is True:
-            coin_score = 0
-            score = 0
-            restart_btn.clicked = False
+        screen.blit(userPassPrompt, (190, 115 + nameSurface.get_height()))
 
-        if exit_btn.clicked is True:
-            pygame.exit()
+        if save_btn.draw(screen):
+            if newName != "" and newPass != "":
+                user = newName
+                passw = newPass
+                db = sqlite3.connect('user.db')
+                db.execute("CREATE TABLE IF NOT EXISTS user(name TEXT, password TEXT)")
+                cursor = db.cursor()
+                cursor.execute("INSERT INTO user(name, password) VALUES (?, ?)", (user, passw,))
+                db.commit()
+                db.close()
+            click_audio.play()
+            nameMenu = False
 
-        #   enemy.update()
-        #   enemy.draw()
-        #  enemy.enemy_movement()
+    if menu == True:
+        if start_btn.draw(screen):
+            click_audio.play()
+            menu = False
+        if exit_btn.draw(screen):
+            running = False
 
-        collided_coin = pygame.sprite.spritecollideany(player, coin_group)
-        if collided_coin is not None:
-            coin_audio.play()
-            collided_coin.kill()
-            coin_score += 1
+    if level_complete:
+        level += 1
+        bg_scroll = 0
+        level_layout = restart()
+        with open(f'level{level}_data.csv', newline='') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+            # individual row and tile, count
+            for i, row in enumerate(reader):
+                for j, tile in enumerate(row):
+                    level_layout[i][j] = int(tile)
 
-        game_score = coin_score * 10
-        if player.health > player.max_health:
-            player.health = player.max_health
+        world = Level()
 
-        collided_treasure = pygame.sprite.spritecollideany(player, treasure_group)
-        if collided_treasure is not None and player.health < 90:
-            collided_treasure.kill()
-            player.health += 50
+        player, hbar = world.game_data(level_layout)
 
-        elif collided_treasure is not None and player.bullet < 5:
-            collided_treasure.kill()
-            player.bullet += 3
-            coin_audio.play()
+    if restart_btn.clicked is True:
+        coin_score = 0
+        score = 0
+        restart_btn.clicked = False
 
-        draw_text('x ' + str(coin_score), font, 'white', coin_img.get_width() + 25, 48)
-        draw_text('Level:' + str(level + 1), font, 'white', 700, 10)
-        draw_text('x ' + str(player.bullet), font, 'white', coin_img.get_width() + 25, 79)
-        draw_text('Score:' + str(game_score), font, 'white', 370, 10)
+    if exit_btn.clicked is True:
+        pygame.exit()
 
-        for enemy in enemy_group:
-            Blob.walk(enemy)
+    #   enemy.update()
+    #   enemy.draw()
+    #  enemy.enemy_movement()
 
-        if player.alive == False:
-            restart_btn.draw(screen)
-            score_save()
+    collided_coin = pygame.sprite.spritecollideany(player, coin_group)
+    if collided_coin is not None:
+        coin_audio.play()
+        collided_coin.kill()
+        coin_score += 1
 
-        hbar.draw(player.health)
+    game_score = coin_score * 10
+    if player.health > player.max_health:
+        player.health = player.max_health
+
+    collided_treasure = pygame.sprite.spritecollideany(player, treasure_group)
+    if collided_treasure is not None and player.health < 90:
+        collided_treasure.kill()
+        player.health += 50
+
+    elif collided_treasure is not None and player.bullet < 5:
+        collided_treasure.kill()
+        player.bullet += 3
+        coin_audio.play()
+
+    draw_text('x ' + str(coin_score), font, 'white', coin_img.get_width() + 25, 48)
+    draw_text('Level:' + str(level + 1), font, 'white', 700, 10)
+    draw_text('x ' + str(player.bullet), font, 'white', coin_img.get_width() + 25, 79)
+    draw_text('Score:' + str(game_score), font, 'white', 370, 10)
+
+    for enemy in enemy_group:
+        Blob.walk(enemy)
+
+    if player.alive == False:
+        restart_btn.draw(screen)
+        score_save()
+
+    hbar.draw(player.health)
+
     ammo_group.update()
     ammo_group.draw(screen)
     treasure_group.update()
@@ -691,17 +720,3 @@ class Treasure(pygame.sprite.Sprite):
                 player, hbar = world.game_data(level_layout)
     score_display()
     pygame.display.update()
-
-
-shoot = False
-menu = True
-nameMenu = True
-
-
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-            pygame.quit()
-pygame.display.update()
