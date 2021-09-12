@@ -53,6 +53,28 @@ def draw_text(text, font, text_col, x, y):
     img = font.render(text, True, text_col)
     screen.blit(img, (x, y))
 
+def score_save():
+    gscore = str(game_score)
+    db = sqlite3.connect('score.db')
+    db.execute("CREATE TABLE IF NOT EXISTS score(score INTEGER)")
+    cursor = db.cursor()
+    cursor.execute("INSERT INTO score(score) VALUES (?)", (gscore,))
+    db.commit()
+    db.close()
+
+
+def score_display():
+    db = sqlite3.connect('score.db')
+    db.execute("CREATE TABLE IF NOT EXISTS score(score INTEGER)")
+    cursor = db.cursor()
+    cursor.execute("SELECT MAX(score) FROM score")
+    data = cursor.fetchone()
+    if data:
+        draw_text('High Score:' + str(data[0]), font, 'white', 370, 40)
+    db.close()
+
+bg_audio.play()
+
 
 while running:
     draw_text()
