@@ -21,9 +21,27 @@ bullet = 20
 font = pygame.font.SysFont('commissars', 30)
 
 screen = pygame.display.set_mode((width, height))
+bullet_img = pygame.image.load('img/bullet .png').convert_alpha()
+box_img = pygame.image.load('img/box.png').convert_alpha()
+
+item_type = {
+    'treasure': box_img
+}
+
+coin_audio = pygame.mixer.Sound(f'sounds/coin.wav')
+enemy_audio = pygame.mixer.Sound(f'sounds/enemy.wav')
+die_audio = pygame.mixer.Sound(f'sounds/die.wav')
+jump_audio = pygame.mixer.Sound(f'sounds/jump.wav')
+click_audio = pygame.mixer.Sound(f'sounds/click.wav')
+bg_audio = pygame.mixer.Sound(f'sounds/background.wav')
+bg_audio.set_volume(0.1)
 
 images = []
 for i in range(tile_types):
     img = pygame.image.load(f'img/tile/{i}.png')
     img = pygame.transform.scale(img, (tile_size, tile_size))
     images.append(img)
+
+
+
+
