@@ -503,8 +503,11 @@ def score_display():
 bg_audio.play()
 
 
+
+
 while running:
     draw_text()
+
 
 running = True
 keys = pygame.key.get_pressed()
@@ -723,4 +726,8 @@ while running:
 
                 player, hbar = world.game_data(level_layout)
     score_display()
+
     pygame.display.update()
+
+    pygame.display.update()
+
