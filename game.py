@@ -1,3 +1,5 @@
+import pygame
+
 import csv
 import os
 import random
