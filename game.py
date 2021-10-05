@@ -502,6 +502,10 @@ def score_display():
 
 bg_audio.play()
 
+
+while running:
+    draw_text()
+
 running = True
 keys = pygame.key.get_pressed()
 
